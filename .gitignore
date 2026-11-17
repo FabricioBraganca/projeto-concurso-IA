@@ -1,0 +1,29 @@
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+
+# Segredos e Variáveis de Ambiente
+.env
+.env.local
+.env.*.local
+
+# Banco de Dados Local
+*.db
+*.sqlite
+*.sqlite3
+
+# Compilações e Builds
+build/
+dist/
+*.spec
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDEs e Sistema Operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

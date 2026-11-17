@@ -1,0 +1,27 @@
+services:
+  concurseiro_ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: concurseiro_ai_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=ConcurseiroAI
+      - APP_ENV=production
+      - DEBUG=False
+      - DATABASE_URL=sqlite:////app/data/concursos.db
+      - GEMINI_MODEL=gemini-2.0-flash
+      # Configure sua chave GEMINI_API_KEY no arquivo .env
+    env_file:
+      - .env
+    volumes:
+      # Persiste o banco de dados SQLite fora do container
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Plano Semanal de Estudos IA — ConcurseiroAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Cronograma Estratégico de Estudos</h1>
+        <p class="page-subtitle">Ciclo de estudos semanal personalizado pela IA, balanceando matérias teóricas, questões diárias e revisões espaçadas.</p>
+    </div>
+</div>
+
+<!-- Card Gerador de Plano de Estudos -->
+<div class="card" style="margin-bottom: 24px;">
+    <h3 style="margin-bottom: 16px; font-size: 1.15rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+        <span>🎯</span> Personalizar Meu Ciclo de Estudos
+    </h3>
+
+    <form id="formGerarPlano">
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Concurso Alvo</label>
+                <input type="text" id="concurso_alvo" class="form-input" value="{{ plano_dados.concurso_alvo or 'Receita Federal' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Cargo / Especialidade</label>
+                <input type="text" id="cargo" class="form-input" value="{{ plano_dados.cargo or 'Auditor-Fiscal' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Horas de Estudo por Dia</label>
+                <select id="horas_por_dia" class="form-select">
+                    <option value="2">2 horas / dia</option>
+                    <option value="3" selected>3 horas / dia (Recomendado)</option>
+                    <option value="4">4 horas / dia</option>
+                    <option value="6">6 horas / dia (Dedicação Plena)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Disciplinas de Maior Dificuldade</label>
+                <input type="text" id="dificuldades" class="form-input" placeholder="Ex: Contabilidade e Raciocínio Lógico" value="Direito Tributário e Raciocínio Lógico">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 14px;">
+            <span id="loadingPlano" style="display: none; color: var(--text-secondary); font-size: 0.9rem;">
+                <span class="spinner"></span> O Mentor de IA está calibrando seu ciclo semanal...
+            </span>
+            <button type="submit" id="btnSubmitPlano" class="btn btn-primary">
+                <span>🤖 Gerar Novo Ciclo com IA</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Visualização do Cronograma -->
+<div class="card" style="margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 1.3rem; color: #fff;">{{ plano.titulo }}</h2>
+        <span class="question-badge" style="background: var(--accent-glow); color: #a5b4fc; border-color: var(--accent);">
+            {{ plano_dados.horas_por_dia or 3 }}h diárias • Foco em Questões
+        </span>
+    </div>
+    
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 24px; padding: 12px 16px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">
+        💡 <strong>Estratégia Adotada:</strong> {{ plano.estrategia_geral }}
+    </p>
+
+    <!-- Grid de Dias da Semana -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px;">
+        {% for dia in plano.dias %}
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                <span style="font-weight: 800; font-size: 1.05rem; color: var(--accent);">📅 {{ dia.dia }}</span>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">⏱️ {{ dia.tempo_questoes }} de questões</span>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase;">Bloco 1: Teoria & Doutrina</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">{{ dia.disciplina_1 }}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">{{ dia.foco_1 }}</div>
+            </div>
+
+            {% if dia.disciplina_2 %}
+            <div style="margin-bottom: 12px;">
+                <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase;">Bloco 2: Aprofundamento</div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">{{ dia.disciplina_2 }}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">{{ dia.foco_2 }}</div>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-subtle); font-size: 0.82rem; color: var(--success); font-weight: 600;">
+                🎯 Meta: {{ dia.meta_do_dia }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Dicas de Fixação -->
+{% if plano.dicas_revisao %}
+<div class="card">
+    <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 12px;">🧠 Diretrizes de Alto Rendimento</h3>
+    <ul style="padding-left: 20px; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.8;">
+        {% for dica in plano.dicas_revisao %}
+        <li>{{ dica }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('formGerarPlano').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitPlano');
+        const loading = document.getElementById('loadingPlano');
+
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        loading.style.display = 'inline-block';
+
+        const payload = {
+            concurso_alvo: document.getElementById('concurso_alvo').value,
+            cargo: document.getElementById('cargo').value,
+            horas_por_dia: parseInt(document.getElementById('horas_por_dia').value, 10),
+            dias_semana: 6,
+            dificuldades_principais: document.getElementById('dificuldades').value
+        };
+
+        try {
+            const res = await fetch('/api/v1/plano-estudos/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error('Erro ao gerar plano');
+            window.location.reload();
+        } catch (err) {
+            alert('Falha ao gerar plano. Tente novamente.');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            loading.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

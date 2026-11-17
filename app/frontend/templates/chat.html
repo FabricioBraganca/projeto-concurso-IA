@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Tutor de Concursos IA — ConcurseiroAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Tutor de Concursos IA</h1>
+        <p class="page-subtitle">Tire dúvidas de matérias, peça macetes de memorização, mapas mentais e análises de bancas examinadoras.</p>
+    </div>
+</div>
+
+<div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+        <div class="message-bubble ai">
+            <strong>⚖️ Tutor ConcurseiroAI:</strong><br>
+            Olá! Sou seu mentor particular para concursos públicos. Como posso potencializar seus estudos hoje? 
+            Você pode me pedir:<br>
+            • <em>"Explique a diferença entre atos vinculados e discricionários com exemplos."</em><br>
+            • <em>"Qual é a pegadinha clássica da FGV em Português?"</em><br>
+            • <em>"Crie uma tabela mnemônica para os princípios do art. 37 da CF (LIMPE)."</em>
+        </div>
+    </div>
+
+    <form class="chat-input-bar" id="chatForm">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Digite sua dúvida de concurso ou peça uma explicação..." autocomplete="off" required>
+        <button type="submit" id="btnSendChat" class="btn btn-primary" style="border-radius: var(--radius-full); padding: 0 24px;">
+            <span>Enviar</span>
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const btnSend = document.getElementById('btnSendChat');
+
+    function appendMessage(text, role) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message-bubble ${role}`;
+        if (role === 'ai') {
+            msgDiv.innerHTML = `<strong>⚖️ Tutor ConcurseiroAI:</strong><br>${text.replace(/\n/g, '<br>')}`;
+        } else {
+            msgDiv.innerText = text;
+        }
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        chatInput.value = '';
+        btnSend.disabled = true;
+
+        // Indicador de digitação
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message-bubble ai';
+        typingIndicator.id = 'typingIndicator';
+        typingIndicator.innerHTML = '<span class="spinner"></span> <em>Analisando jurisprudência e doutrina...</em>';
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+            const res = await fetch('/api/v1/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem: text })
+            });
+
+            const data = await res.json();
+            const ind = document.getElementById('typingIndicator');
+            if (ind) ind.remove();
+
+            appendMessage(data.resposta || 'Não foi possível processar.', 'ai');
+        } catch (err) {
+            const ind = document.getElementById('typingIndicator');
+            if (ind) ind.remove();
+            appendMessage('Desculpe, ocorreu uma instabilidade ao conectar com o tutor. Tente novamente.', 'ai');
+        } finally {
+            btnSend.disabled = false;
+            chatInput.focus();
+        }
+    });
+</script>
+{% endblock %}

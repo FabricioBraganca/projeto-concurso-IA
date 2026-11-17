@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderno de Prova — {{ simulado.titulo }}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Times New Roman", Times, Georgia, serif;
+            color: #000;
+            background-color: #fff;
+            line-height: 1.45;
+            padding: 20px 40px;
+        }
+
+        /* Barra de Ações (Oculta na Impressão) */
+        .no-print-bar {
+            position: sticky;
+            top: 0;
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            margin: -20px -40px 24px -40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            z-index: 1000;
+        }
+
+        .btn-action {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-back {
+            background: #475569;
+        }
+
+        .btn-back:hover {
+            background: #334155;
+        }
+
+        /* Cabeçalho Oficial do Concurso */
+        .exam-header {
+            border: 2px solid #000;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .exam-header h1 {
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .exam-header h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .exam-meta {
+            font-size: 0.88rem;
+            border-top: 1px solid #000;
+            padding-top: 6px;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+        }
+
+        /* Caixa de Instruções e Dados do Candidato */
+        .instructions-box {
+            border: 1px solid #000;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            margin-bottom: 22px;
+            background: #fafafa;
+        }
+
+        .instructions-box h3 {
+            font-size: 0.88rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .instructions-box ol {
+            padding-left: 20px;
+        }
+
+        .candidate-fields {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #666;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .field-line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            width: 100%;
+            height: 18px;
+        }
+
+        /* Cartão Resposta / Folha de Gabarito */
+        .answer-sheet {
+            border: 1.5px solid #000;
+            padding: 12px;
+            margin-bottom: 24px;
+            page-break-inside: avoid;
+        }
+
+        .answer-sheet-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+        }
+
+        .bubble-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px 14px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 0.8rem;
+        }
+
+        .bubble-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bubble-num {
+            font-weight: bold;
+            width: 26px;
+            text-align: right;
+        }
+
+        .bubbles {
+            display: flex;
+            gap: 4px;
+        }
+
+        .bubble {
+            width: 17px;
+            height: 17px;
+            border: 1.5px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        /* Bloco de Questões */
+        .section-title {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            margin: 20px 0 16px 0;
+            padding-bottom: 4px;
+        }
+
+        .question-item {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .question-number {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .question-body {
+            font-size: 0.92rem;
+            text-align: justify;
+            margin-bottom: 8px;
+            text-indent: 1.5em;
+        }
+
+        .alternatives-box {
+            padding-left: 10px;
+        }
+
+        .alt-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            text-align: justify;
+        }
+
+        .alt-letter {
+            font-weight: bold;
+            min-width: 24px;
+        }
+
+        /* Página de Gabarito Comentado (Impressão no Final) */
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        .feedback-item {
+            margin-bottom: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 12px;
+            page-break-inside: avoid;
+        }
+
+        .feedback-item h4 {
+            font-size: 0.92rem;
+            margin-bottom: 4px;
+        }
+
+        .feedback-text {
+            font-size: 0.85rem;
+            color: #222;
+            text-align: justify;
+            white-space: pre-line;
+        }
+
+        /* Regras Estritas de Impressão (PDF / Impressora) */
+        @media print {
+            body {
+                padding: 0;
+                font-size: 11pt;
+            }
+
+            .no-print-bar {
+                display: none !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Ferramentas Superior (Invisível na Impressão/PDF) -->
+    <div class="no-print-bar">
+        <div>
+            <strong>📄 Caderno de Prova & Folha de Respostas</strong> — {{ simulado.titulo }}
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="/simulados/{{ simulado.id }}" class="btn-action btn-back">⬅️ Voltar ao Simulado</a>
+            <button onclick="window.print()" class="btn-action">🖨️ Imprimir / Salvar como PDF</button>
+        </div>
+    </div>
+
+    <!-- Cabeçalho Oficial -->
+    <div class="exam-header">
+        <h1>ConcurseiroAI — Plataforma Inteligente de Avaliação</h1>
+        <h2>{{ simulado.titulo }}</h2>
+        <div class="exam-meta">
+            <span>Banca: {{ simulado.banca_filtro or "Estilo Oficial" }}</span>
+            <span>Disciplina: {{ simulado.tema_filtro or "Geral" }}</span>
+            <span>Total: {{ questoes|length }} Questões</span>
+            <span>Nível: {{ simulado.dificuldade or "Médio" }}</span>
+        </div>
+    </div>
+
+    <!-- Instruções e Identificação -->
+    <div class="instructions-box">
+        <h3>Instruções Gerais aos Candidatos</h3>
+        <ol>
+            <li>Verifique se este caderno contém exatamente {{ questoes|length }} questões objetivas de múltipla escolha.</li>
+            <li>Para cada questão, há apenas uma alternativa correta. Preencha a respectiva bolha na Folha de Respostas abaixo.</li>
+            <li>Tempo sugerido de resolução: 3 minutos por questão.</li>
+            <li>Após o término da resolução, confira o Gabarito Oficial e as Fundamentações no final deste caderno.</li>
+        </ol>
+        <div class="candidate-fields">
+            <div>Nome do Candidato: <span class="field-line"></span></div>
+            <div>Inscrição / CPF: <span class="field-line"></span></div>
+            <div>Assinatura: <span class="field-line"></span></div>
+        </div>
+    </div>
+
+    <!-- Folha de Respostas Oficial (Cartão-Resposta) -->
+    <div class="answer-sheet">
+        <div class="answer-sheet-title">Folha de Respostas (Cartão-Gabarito)</div>
+        <div class="bubble-grid">
+            {% for q in questoes %}
+            <div class="bubble-row">
+                <span class="bubble-num">{{ "%02d" % q.ordem }}.</span>
+                <div class="bubbles">
+                    <span class="bubble">A</span>
+                    <span class="bubble">B</span>
+                    <span class="bubble">C</span>
+                    <span class="bubble">D</span>
+                    <span class="bubble">E</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Prova Objetiva -->
+    <div class="section-title">Prova Objetiva — Caderno de Questões</div>
+
+    {% for q in questoes %}
+    <div class="question-item">
+        <div class="question-number">QUESTÃO {{ q.ordem }} ({{ q.banca or simulado.banca_filtro }} • {{ q.tema or simulado.tema_filtro }})</div>
+        <div class="question-body">{{ q.enunciado }}</div>
+        <div class="alternatives-box">
+            {% for alt in q.alternativas %}
+            <div class="alt-line">
+                <span class="alt-letter">({{ alt.letra }})</span>
+                <span>{{ alt.texto }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Gabarito Oficial e Comentado na Página Final -->
+    <div class="page-break">
+        <div class="section-title">Gabarito Oficial & Fundamentação Jurisprudencial / Legal</div>
+        <p style="font-size: 0.85rem; margin-bottom: 16px; font-style: italic; text-align: center;">
+            (Consulte apenas após o término da resolução da prova)
+        </p>
+
+        <div style="margin-bottom: 20px; border: 1px solid #000; padding: 10px;">
+            <div style="font-weight: bold; margin-bottom: 6px; font-size: 0.9rem; text-transform: uppercase;">Quadro Resumo de Respostas:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; font-family: monospace; font-size: 0.95rem;">
+                {% for q in questoes %}
+                <span style="border: 1px solid #333; padding: 2px 8px;"><strong>{{ "%02d" % q.ordem }}:</strong> {{ q.resposta_certa }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% for q in questoes %}
+        <div class="feedback-item">
+            <h4>Questão {{ q.ordem }} — Gabarito Oficial: ({{ q.resposta_certa }})</h4>
+            <div class="feedback-text">{{ q.explicacao_ia or "Fundamentação fundamentada na legislação de regência e jurisprudência consolidada." }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

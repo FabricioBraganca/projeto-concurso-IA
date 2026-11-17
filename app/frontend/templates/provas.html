@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Repositório de Provas de Bancas — ConcurseiroAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Repositório de Provas & Gabaritos</h1>
+        <p class="page-subtitle">Pesquise cadernos de prova reais aplicados pelas principais bancas organizadoras do
+            Brasil.</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+        <input type="text" class="form-input" placeholder="🔍 Digite cargo, órgão ou ano..."
+            style="flex: 1; min-width: 250px;">
+        <select class="form-select" style="min-width: 160px;">
+            <option value="">Todas as Bancas</option>
+            <option value="Cebraspe">Cebraspe / Cespe</option>
+            <option value="FGV">FGV</option>
+            <option value="FCC">FCC</option>
+            <option value="Vunesp">Vunesp</option>
+        </select>
+        <select class="form-select" style="min-width: 120px;">
+            <option value="">Todos os Anos</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+        </select>
+        <button class="btn btn-primary"><span>Filtrar</span></button>
+    </div>
+</div>
+
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                <th style="padding: 12px 14px;">Banca</th>
+                <th style="padding: 12px 14px;">Concurso / Órgão</th>
+                <th style="padding: 12px 14px;">Cargo</th>
+                <th style="padding: 12px 14px;">Ano</th>
+                <th style="padding: 12px 14px;">Disciplinas em Destaque</th>
+                <th style="padding: 12px 14px; text-align: right;">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in provas %}
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 14px;"><span class="question-badge">{{ p.banca }}</span></td>
+                <td style="padding: 14px; font-weight: 600;">{{ p.orgao }}</td>
+                <td style="padding: 14px;">{{ p.cargo }}</td>
+                <td style="padding: 14px;"><span style="color: var(--text-muted);">{{ p.ano }}</span></td>
+                <td style="padding: 14px; color: var(--text-secondary); font-size: 0.85rem;">{{ p.disciplinas_destaque
+                    }}</td>
+                <td style="padding: 14px; text-align: right;">
+                    <a href="/simulados" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 12px;">Gerar
+                        Treino {{ p.banca }}</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Concursos Abertos & Previstos — ConcurseiroAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Radar de Concursos Públicos</h1>
+        <p class="page-subtitle">Acompanhe editais publicados, inscrições abertas e previsões orçamentárias de todas as esferas.</p>
+    </div>
+</div>
+
+<!-- Filtros de Concursos -->
+<div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+        <input type="text" class="form-input" placeholder="🔍 Filtrar por órgão, cargo ou palavra-chave..." style="flex: 1; min-width: 250px;">
+        <select class="form-select" style="min-width: 150px;">
+            <option value="">Todas as Regiões</option>
+            <option value="Nacional">Nacional / Federal</option>
+            <option value="SP">São Paulo</option>
+            <option value="RJ">Rio de Janeiro</option>
+            <option value="DF">Distrito Federal</option>
+            <option value="MG">Minas Gerais</option>
+        </select>
+        <select class="form-select" style="min-width: 150px;">
+            <option value="">Todas as Carreiras</option>
+            <option value="Judiciaria">Tribunais e Judiciário</option>
+            <option value="Fiscal">Fiscal e Controle</option>
+            <option value="Policial">Segurança Pública</option>
+            <option value="Administrativa">Administrativa</option>
+        </select>
+    </div>
+</div>
+
+<!-- Grid de Concursos Dinâmicos -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+    {% for c in concursos %}
+    <div class="card" style="border-top: 4px solid {% if 'Abert' in c.status %}var(--success){% elif 'Publicad' in c.status %}var(--info){% else %}var(--warning){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+            <span class="question-badge" style="background: {% if 'Abert' in c.status %}var(--success-bg){% elif 'Publicad' in c.status %}rgba(59, 130, 246, 0.15){% else %}var(--warning-bg){% endif %}; color: {% if 'Abert' in c.status %}var(--success){% elif 'Publicad' in c.status %}var(--info){% else %}var(--warning){% endif %};">
+                {{ c.status }}
+            </span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ c.regiao }}</span>
+        </div>
+        <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 6px;">{{ c.orgao }}</h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 14px; min-height: 40px;">{{ c.cargos }}</p>
+        
+        <div style="background: var(--bg-surface-elevated); padding: 12px; border-radius: var(--radius-md); font-size: 0.82rem; margin-bottom: 16px;">
+            <div>🏛️ <strong>Banca:</strong> {{ c.banca or 'A definir' }}</div>
+            <div style="margin-top: 4px;">💰 <strong>Remuneração:</strong> {{ c.salario }}</div>
+            <div style="margin-top: 4px;">📅 <strong>Inscrições:</strong> {{ c.data_inscricao_fim }}</div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="/simulados" class="btn btn-primary" style="flex: 1; font-size: 0.85rem;">Gerar Simulado {{ c.banca }}</a>
+            {% if c.link_edital and c.link_edital != '#' %}
+            <a href="{{ c.link_edital }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="font-size: 0.85rem;">Ver Edital ↗</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

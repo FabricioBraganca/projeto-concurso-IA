@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ConcurseiroAI — Plataforma Inteligente de Concursos{% endblock %}</title>
+    <!-- Fonte Inter Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <!-- Chart.js para dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Sidebar Fixa -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">⚖️</div>
+            <div class="brand-name">Concurseiro<span style="color:var(--accent);">AI</span></div>
+            <span class="brand-badge">PRO</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="/" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/simulados" class="nav-item {% if active_page == 'simulados' %}active{% endif %}">
+                <span class="nav-icon">📝</span>
+                <span>Simulados IA</span>
+            </a>
+            <a href="/chat" class="nav-item {% if active_page == 'chat' %}active{% endif %}">
+                <span class="nav-icon">🤖</span>
+                <span>Tutor Concursos</span>
+            </a>
+            <a href="/concursos-abertos" class="nav-item {% if active_page == 'concursos' %}active{% endif %}">
+                <span class="nav-icon">📢</span>
+                <span>Concursos Abertos</span>
+            </a>
+            <a href="/provas" class="nav-item {% if active_page == 'provas' %}active{% endif %}">
+                <span class="nav-icon">📚</span>
+                <span>Banco de Provas</span>
+            </a>
+            <a href="/flashcards" class="nav-item {% if active_page == 'flashcards' %}active{% endif %}">
+                <span class="nav-icon">🃏</span>
+                <span>Flashcards Anki</span>
+            </a>
+            <a href="/plano-estudos" class="nav-item {% if active_page == 'plano' %}active{% endif %}">
+                <span class="nav-icon">📅</span>
+                <span>Plano Semanal IA</span>
+            </a>
+        </nav>
+
+
+        <div class="user-profile">
+            <div class="user-avatar">FA</div>
+            <div class="user-info">
+                <div class="user-name">Fabricio (Você)</div>
+                <div class="user-target">Foco: Analista / Auditor</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

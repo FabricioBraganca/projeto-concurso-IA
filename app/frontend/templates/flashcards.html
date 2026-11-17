@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Flashcards & Revisão Espaçada — ConcurseiroAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Flashcards com Repetição Espaçada</h1>
+        <p class="page-subtitle">Algoritmo inteligente de memorização ativa (método Anki / SM-2) para fixação de prazos, leis e súmulas.</p>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalNovoCard()">
+        <span>➕ Novo Flashcard</span>
+    </button>
+</div>
+
+<!-- Modal Criação de Card -->
+<div id="modalNovoCard" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 500px; max-width: 90%; border-color: var(--accent);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="color: #fff; font-size: 1.15rem;">Criar Novo Flashcard</h3>
+            <button onclick="fecharModalNovoCard()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+        </div>
+        <form id="formCriarCard">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label">Disciplina / Tema</label>
+                <input type="text" id="cardTema" class="form-input" placeholder="Ex: Direito Administrativo • Licitações" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label">Frente (Pergunta ou Conceito)</label>
+                <textarea id="cardFrente" class="form-input" rows="3" placeholder="Ex: Qual o prazo para impugnação do edital de licitação?" required></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label">Verso (Resposta ou Fundamento)</label>
+                <textarea id="cardVerso" class="form-input" rows="3" placeholder="Ex: Até 3 dias úteis antes da abertura da sessão (art. 164 da Lei 14.133/21)." required></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalNovoCard()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar Flashcard</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div style="max-width: 680px; margin: 30px auto; text-align: center;">
+    <div id="flashcardBox" class="card" style="min-height: 280px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; padding: 40px; border-color: var(--accent); transition: var(--transition);">
+        <span class="question-badge" id="cardBadge">Carregando...</span>
+        <div id="cardContent" style="font-size: 1.25rem; font-weight: 600; color: #fff; margin-top: 20px; line-height: 1.6; white-space: pre-line;">
+            Carregando seus flashcards de concursos...
+        </div>
+        <div id="cardHint" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 24px;">
+            (Clique no cartão para revelar a resposta)
+        </div>
+    </div>
+
+    <!-- Botões de Avaliação da Dificuldade (Anki SM-2) -->
+    <div id="ankiButtons" style="display: none; justify-content: center; gap: 14px; margin-top: 24px;">
+        <button class="btn" style="background: var(--error-bg); color: var(--error); border: 1px solid var(--error);" onclick="avaliarCard(1)">
+            🔴 Errei (Rever amanhã)
+        </button>
+        <button class="btn" style="background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning);" onclick="avaliarCard(3)">
+            🟡 Difícil (Revisar em breve)
+        </button>
+        <button class="btn" style="background: var(--success-bg); color: var(--success); border: 1px solid var(--success);" onclick="avaliarCard(5)">
+            🟢 Fácil (Fixado)
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let cards = [
+        {% for c in cards %}
+        {
+            id: {{ c.id }},
+            tema: {{ c.tema | tojson }},
+            frente: {{ c.frente | tojson }},
+            verso: {{ c.verso | tojson }},
+            intervalo: {{ c.intervalo_dias or 1 }}
+        },
+        {% endfor %}
+    ];
+
+    let currentIdx = 0;
+    let isFlipped = false;
+
+    const box = document.getElementById('flashcardBox');
+    const badge = document.getElementById('cardBadge');
+    const content = document.getElementById('cardContent');
+    const hint = document.getElementById('cardHint');
+    const ankiBtns = document.getElementById('ankiButtons');
+
+    function renderCurrentCard() {
+        if (!cards || cards.length === 0) {
+            badge.innerText = 'Sem cards';
+            content.innerText = 'Nenhum flashcard para revisar agora. Clique em "Novo Flashcard" para adicionar!';
+            hint.innerText = '';
+            return;
+        }
+        isFlipped = false;
+        const c = cards[currentIdx];
+        badge.innerText = c.tema;
+        content.innerText = c.frente;
+        content.style.color = '#fff';
+        hint.innerText = '(Clique no cartão para revelar a resposta)';
+        ankiBtns.style.display = 'none';
+    }
+
+    box.addEventListener('click', () => {
+        if (!isFlipped && cards.length > 0) {
+            content.innerText = cards[currentIdx].verso;
+            content.style.color = '#a5b4fc';
+            hint.innerText = 'Como você avalia a sua memorização? (Algoritmo SM-2)';
+            ankiBtns.style.display = 'flex';
+            isFlipped = true;
+        }
+    });
+
+    async function avaliarCard(qualidade) {
+        const c = cards[currentIdx];
+        try {
+            await fetch(`/api/v1/flashcards/${c.id}/avaliar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ qualidade })
+            });
+        } catch (e) {
+            console.error(e);
+        }
+
+        currentIdx = (currentIdx + 1) % cards.length;
+        renderCurrentCard();
+    }
+
+    function abrirModalNovoCard() {
+        document.getElementById('modalNovoCard').style.display = 'flex';
+    }
+
+    function fecharModalNovoCard() {
+        document.getElementById('modalNovoCard').style.display = 'none';
+    }
+
+    document.getElementById('formCriarCard').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const payload = {
+            tema: document.getElementById('cardTema').value,
+            frente: document.getElementById('cardFrente').value,
+            verso: document.getElementById('cardVerso').value
+        };
+
+        const res = await fetch('/api/v1/flashcards/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            alert('Erro ao criar card');
+        }
+    });
+
+    renderCurrentCard();
+</script>
+{% endblock %}
+
